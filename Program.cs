@@ -6,6 +6,13 @@ using Serilog;
 using System.Text;
 using System.Text.Json.Serialization;
 using Scalar.AspNetCore;
+using FluentValidation;
+using OrbitPass.Application.Interfaces;
+using OrbitPass.Application.Services;
+using OrbitPass.Core.Interfaces;
+using OrbitPass.Infrastructure.Repositories;
+using FluentValidation.AspNetCore;
+using OrbitPass.Application.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +68,22 @@ builder.Services.AddCors(options =>
 
 // Memory Cache
 builder.Services.AddMemoryCache();
+
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<AuthMappingProfile>();
+});
+// FluentValidation
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+// Repository Services
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IEventRepository, EventRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // API Documentation with Scalar
 builder.Services.AddOpenApi();
