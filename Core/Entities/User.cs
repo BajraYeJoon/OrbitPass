@@ -15,4 +15,6 @@ public class User : BaseEntity
     public ICollection<Event> Events { get; set; } = [];  // C# 12 collection expression
     public ICollection<Order> Orders { get; set; } = [];
     public ICollection<OrbitCoinTransaction> Transactions { get; set; } = [];
+
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
 }

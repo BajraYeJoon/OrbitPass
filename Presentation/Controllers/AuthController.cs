@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using OrbitPass.Application.Interfaces;
 using OrbitPass.Core.DTOs;
+using OrbitPass.Core.Entities;
 using Serilog;
 
 namespace OrbitPass.Presentation.Controllers;
@@ -55,4 +57,48 @@ public class AuthController(IAuthService authService, ILogger<AuthController> lo
             return StatusCode(500, new { message = "An error occurred during login" });
         }
     }
+
+    [HttpPost("refresh-token")]
+    public async Task<ActionResult<AuthResponse>> RefreshTokenAsync(RefreshTokenRequest refreshTokenRequest)
+    {
+        try
+        {
+            logger.LogInformation("Refreshing token for refresh token: {RefreshToken}", refreshTokenRequest.RefreshToken);
+
+            var res = await authService.RefreshTokenAsync(refreshTokenRequest);
+
+            logger.LogInformation("Token refreshed successfully for refresh token: {RefreshToken}", refreshTokenRequest.RefreshToken);
+            return Ok(res);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            logger.LogWarning("Token refresh failed: {Message}", ex.Message);
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Unexpected error during token refresh for refresh token: {RefreshToken}", refreshTokenRequest.RefreshToken);
+            return StatusCode(500, new { message = "An error occurred during token refresh" });
+        }
+    }
+
+    [HttpPost("logout")]
+    public async Task<ActionResult> LogoutAsync(RefreshTokenRequest request)
+    {
+        try
+        {
+            logger.LogInformation("Logging out user with refresh token: {RefreshToken}", request.RefreshToken);
+
+            await authService.LogoutAsync(request);
+
+            return Ok(new { message = "Logged out successfully" });
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Unexpected error during logout for refresh token: {RefreshToken}", request.RefreshToken);
+            return StatusCode(500, new { message = "An error occurred during logout" });
+        }
+    }
+
+
 }

@@ -13,8 +13,9 @@ public class AuthMappingProfile : Profile
             .ForMember(dest => dest.OrbitCoins, opt => opt.MapFrom(src => 200)); // Default starting coins
 
         CreateMap<User, AuthResponse>()
-                    .ForMember(dest => dest.Token, opt => opt.Ignore()) // Handle separately
+                    .ForMember(dest => dest.AccessToken, opt => opt.Ignore()) // Handle separately
 
+                    .ForMember(dest => dest.RefreshToken, opt => opt.Ignore()) // Handle separately
             .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()));
     }
 }
